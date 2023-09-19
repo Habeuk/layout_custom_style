@@ -4,11 +4,15 @@ namespace Drupal\layout_custom_style;
 
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for style_scss plugins.
  */
-abstract class StyleScssPluginBase extends PluginBase implements StyleScssInterface {
+abstract class StyleScssPluginBase extends PluginBase implements StyleScssInterface, ContainerFactoryPluginInterface {
+  use StringTranslationTrait;
   /**
    * Config settings.
    *
@@ -39,6 +43,14 @@ abstract class StyleScssPluginBase extends PluginBase implements StyleScssInterf
   public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->configFactory = $config_factory;
+  }
+  
+  /**
+   *
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static($configuration, $plugin_id, $plugin_definition, $container->get('config.factory'));
   }
   
   /**

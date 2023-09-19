@@ -40,14 +40,13 @@ class Foo extends StyleScssPluginBase {
   /**
    * --
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+  public function buildConfigurationForm(array &$form, FormStateInterface $form_state) {
     $form['foo_example'] = [
       '#type' => 'textfield',
       '#title' => 'foo example',
       '#default_value' => $this->configuration['foo_example'],
       '#description' => 'example : 400px '
     ];
-    return $form;
   }
   
   /**

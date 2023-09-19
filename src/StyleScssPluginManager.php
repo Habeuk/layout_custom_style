@@ -37,8 +37,12 @@ class StyleScssPluginManager extends DefaultPluginManager {
   public function buildConfiguration(array &$form, FormStateInterface $form_state) {
     $plugins = $this->getDefinitions();
     foreach ($plugins as $i => $plugin) {
-      \Stephane888\Debug\debugLog::kintDebugDrupal($plugin, 'buildConfiguration', true);
-      // $this->createInstance($plugin_id)
+      /**
+       *
+       * @var \Drupal\layout_custom_style\Plugin\StyleScss\Foo $instance
+       */
+      $instance = $this->createInstance($plugin['id']);
+      $instance->buildConfigurationForm($form, $form_state);
     }
   }
   
