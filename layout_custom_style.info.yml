@@ -1,0 +1,7 @@
+name: layout custom style
+type: module
+description: permet d&#039;ajouter des styles et de construire rapidement des layouts.
+package: Custom
+core_version_requirement: ^9 || ^10
+dependencies:
+  - formatage_models

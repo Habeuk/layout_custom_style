@@ -1,0 +1,4 @@
+administer layout_custom_style configuration:
+  title: 'Administer layout_custom_style configuration'
+  description: 'Optional description.'
+  restrict access: true
