@@ -7,6 +7,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Base class for style_scss plugins.
@@ -62,12 +63,41 @@ abstract class StyleScssPluginBase extends PluginBase implements StyleScssInterf
     return (string) $this->pluginDefinition['label'];
   }
   
+  public function description() {
+    return (string) $this->pluginDefinition['description'];
+  }
+  
+  public function getConfiguration() {
+    return $this->configuration;
+  }
+  
   /**
    *
    * {@inheritdoc}
    */
   public function config() {
     return $this->configFactory->getEditable(static::CONFIG);
+  }
+  
+  /**
+   *
+   * {@inheritdoc}
+   * @see \Drupal\layout_custom_style\StyleScssInterface::build()
+   */
+  public function build(array $build) {
+    // Nothing
+    return $build;
+  }
+  
+  public function getScss() {
+  }
+  
+  /**
+   *
+   * {@inheritdoc}
+   */
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+    $this->configuration = $form_state->getValue($this->pluginId);
   }
   
 }

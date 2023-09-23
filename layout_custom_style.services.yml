@@ -1,4 +1,4 @@
 services:
   plugin.manager.style_scss:
     class: Drupal\layout_custom_style\StyleScssPluginManager
-    parent: default_plugin_manager
+    arguments: ['@container.namespaces', '@cache.default', '@module_handler', '@generate_style_theme.manage_file_custom_style']
