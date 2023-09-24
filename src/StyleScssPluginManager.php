@@ -43,7 +43,7 @@ class StyleScssPluginManager extends DefaultPluginManager {
    * Cette fonction doit s'excuter en administration.
    */
   public function build(&$build, array $storage) {
-    $this->addIdHtmlInSection($build, $storage);
+    $this->addClassHtmlInSection($build, $storage);
   }
   
   /**
@@ -78,7 +78,10 @@ class StyleScssPluginManager extends DefaultPluginManager {
    * @param array $storage
    */
   public function submitConfigurationForm(array $form, FormStateInterface $form_state, array &$storage) {
-    // check #id
+    /**
+     * Ce #id permet d'identifier la section.
+     * Elle est generé à la premier sauvegarde.
+     */
     if (empty($storage['id'])) {
       /**
        *
@@ -106,21 +109,31 @@ class StyleScssPluginManager extends DefaultPluginManager {
       $instance = $this->createInstance($plugin['id'], $storage[$plugin['id']]);
       $instance->submitConfigurationForm($form, $form_state);
       $storage[$plugin['id']] = $instance->getConfiguration();
-      $scss = '#' . $storage['id'] . ' {';
-      $scss .= $instance->getScss();
-      $scss .= '}';
-      $js = '';
+      $contentScss = $instance->getScss();
       $key = $storage['id'];
-      $this->ManageFileCustomStyle->saveStyle($key, $plugin['provider'], $scss, $js);
+      if (!empty($contentScss)) {
+        $scss = '.' . $storage['id'] . ' {';
+        $scss .= $instance->getScss();
+        $scss .= '}';
+        $js = '';
+        $this->ManageFileCustomStyle->saveStyle($key, $plugin['provider'], $scss, $js);
+      }
+      else {
+        $this->ManageFileCustomStyle->deleteStyle($key, $plugin['provider']);
+      }
     }
   }
   
   /**
-   * Verifie si l'entité a un #id sinon on l'ajoute.
+   * Ajoute la valeur $storage['id'] dans la class.
+   * La classe est adapté car on peut avoir un model de teaser qui s'applique
+   * que plusieurs contenu. example les teasers d'articles.
    */
-  protected function addIdHtmlInSection(&$build, &$storage) {
+  protected function addClassHtmlInSection(&$build, &$storage) {
     if (!empty($storage['id'])) {
-      $build['#attributes']['id'] = $storage['id'];
+      if (empty($build['#attributes']['class']))
+        $build['#attributes']['class'] = [];
+      $build['#attributes']['class'][] = $storage['id'];
     }
   }
   
