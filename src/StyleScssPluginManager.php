@@ -44,19 +44,6 @@ class StyleScssPluginManager extends DefaultPluginManager {
    */
   public function build(&$build, array $storage) {
     $this->addIdHtmlInSection($build, $storage);
-    // dump($storage);
-    // $plugins = $this->getDefinitions();
-    // foreach ($plugins as $plugin) {
-    // if (empty($storage[$plugin['id']]))
-    // $storage[$plugin['id']] = [];
-    // /**
-    // *
-    // * @var \Drupal\layout_custom_style\Plugin\StyleScss\Foo $instance
-    // */
-    // $instance = $this->createInstance($plugin['id'],
-    // $storage[$plugin['id']]);
-    // $instance->build($build);
-    // }
   }
   
   /**
@@ -70,11 +57,10 @@ class StyleScssPluginManager extends DefaultPluginManager {
         $storage[$plugin['id']] = [];
       /**
        *
-       * @var \Drupal\layout_custom_style\Plugin\StyleScss\Foo $instance
+       * @var \Drupal\layout_custom_style\StyleScssPluginBase $instance
        */
       $instance = $this->createInstance($plugin['id'], $storage[$plugin['id']]);
-      // \Stephane888\Debug\debugLog::kintDebugDrupal($instance,
-      // 'buildConfiguration', true);
+      
       $form[$plugin['id']] = [
         '#type' => 'details',
         '#title' => $instance->label(),
@@ -120,10 +106,6 @@ class StyleScssPluginManager extends DefaultPluginManager {
       $instance = $this->createInstance($plugin['id'], $storage[$plugin['id']]);
       $instance->submitConfigurationForm($form, $form_state);
       $storage[$plugin['id']] = $instance->getConfiguration();
-      \Stephane888\Debug\debugLog::kintDebugDrupal([
-        'instance' => $instance,
-        'plugin' => $plugin
-      ], 'submitConfigurationForm', true);
       $scss = '#' . $storage['id'] . ' {';
       $scss .= $instance->getScss();
       $scss .= '}';
