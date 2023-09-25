@@ -125,6 +125,39 @@ class StyleScssPluginManager extends DefaultPluginManager {
   }
   
   /**
+   * Permet à des modules externes de sauvegarder des styles.
+   *
+   * @param array $storage
+   */
+  public function addConfigs(array $storage) {
+    if (!empty($storage['id'])) {
+      $plugins = $this->getDefinitions();
+      foreach ($plugins as $plugin) {
+        if (!empty($storage[$plugin['id']])) {
+          /**
+           *
+           * @var \Drupal\layout_custom_style\StyleScssPluginBase $instance
+           */
+          $instance = $this->createInstance($plugin['id'], $storage[$plugin['id']]);
+          $storage[$plugin['id']] = $instance->getConfiguration();
+          $contentScss = $instance->getScss();
+          $key = $storage['id'];
+          if (!empty($contentScss)) {
+            $scss = '.' . $storage['id'] . ' {';
+            $scss .= $instance->getScss();
+            $scss .= '}';
+            $js = '';
+            $this->ManageFileCustomStyle->saveStyle($key, $plugin['provider'], $scss, $js);
+          }
+          else {
+            $this->ManageFileCustomStyle->deleteStyle($key, $plugin['provider']);
+          }
+        }
+      }
+    }
+  }
+  
+  /**
    * Ajoute la valeur $storage['id'] dans la class.
    * La classe est adapté car on peut avoir un model de teaser qui s'applique
    * que plusieurs contenu. example les teasers d'articles.
