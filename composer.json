@@ -11,6 +11,6 @@
     ],
     "minimum-stability": "dev",
     "require": {
-    	"habeuk/generate_style_theme": "dev-3x|^3.0.1"
+    	"habeuk/generate_style_theme": "dev-3x|^3.0.1|dev-4x|^4.0"
     }
 }
