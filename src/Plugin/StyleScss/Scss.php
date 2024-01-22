@@ -16,13 +16,13 @@ use Drupal\Core\Form\FormStateInterface;
  * )
  */
 class Scss extends StyleScssPluginBase {
-  
+
   public function defaultConfiguration() {
     return [
-      'scss' => 'Test OK'
+      'scss' => ''
     ];
   }
-  
+
   /**
    * Cette fonction est utilisé pour construire le rendu.
    *
@@ -32,7 +32,7 @@ class Scss extends StyleScssPluginBase {
     // Nothing
     return $build;
   }
-  
+
   /**
    * --
    */
@@ -41,15 +41,22 @@ class Scss extends StyleScssPluginBase {
       '#type' => 'textarea',
       '#title' => 'Scss',
       '#default_value' => $this->configuration['scss_field'],
+      '#attributes' => [
+        'class' => [
+          'codemirror',
+          'lang_scss'
+        ]
+      ],
       '#description' => 'automatique import mixin and variable for current theme. @see wbu-atomique'
     ];
+    $form['#attached']['library'][] = 'generate_style_theme/codemirror_admin';
   }
-  
+
   /**
    * Retourne le contenu de la scss.
    */
   public function getScss() {
     return $this->configuration['scss_field'];
   }
-  
+
 }

@@ -13,13 +13,13 @@ use Drupal\generate_style_theme\Services\ManageFileCustomStyle;
  * StyleScss plugin manager.
  */
 class StyleScssPluginManager extends DefaultPluginManager {
-  
+
   /**
    *
    * @var ManageFileCustomStyle
    */
   protected $ManageFileCustomStyle;
-  
+
   /**
    * Constructs StyleScssPluginManager object.
    *
@@ -38,14 +38,14 @@ class StyleScssPluginManager extends DefaultPluginManager {
     $this->setCacheBackend($cache_backend, 'style_scss_plugins');
     $this->ManageFileCustomStyle = $ManageFileCustomStyle;
   }
-  
+
   /**
    * Cette fonction doit s'excuter en administration.
    */
   public function build(&$build, array $storage) {
     $this->addClassHtmlInSection($build, $storage);
   }
-  
+
   /**
    * Permet de construire une configuration en se basant sur tous les plugins
    * existant.
@@ -60,17 +60,18 @@ class StyleScssPluginManager extends DefaultPluginManager {
        * @var \Drupal\layout_custom_style\StyleScssPluginBase $instance
        */
       $instance = $this->createInstance($plugin['id'], $storage[$plugin['id']]);
-      
+
       $form[$plugin['id']] = [
         '#type' => 'details',
         '#title' => $instance->label(),
-        // '#description' => $instance->description(),
+        '#description' => $instance->description() . "BUG : Editer scss dans un nouveau onglet",
         '#open' => false
       ];
+
       $instance->buildConfigurationForm($form[$plugin['id']], $form_state);
     }
   }
-  
+
   /**
    *
    * @param array $form
@@ -123,7 +124,7 @@ class StyleScssPluginManager extends DefaultPluginManager {
       }
     }
   }
-  
+
   /**
    * Permet à des modules externes de sauvegarder des styles.
    *
@@ -156,7 +157,7 @@ class StyleScssPluginManager extends DefaultPluginManager {
       }
     }
   }
-  
+
   /**
    * Ajoute la valeur $storage['id'] dans la class.
    * La classe est adapté car on peut avoir un model de teaser qui s'applique
@@ -169,5 +170,5 @@ class StyleScssPluginManager extends DefaultPluginManager {
       $build['#attributes']['class'][] = $storage['id'];
     }
   }
-  
+
 }

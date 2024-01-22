@@ -4,5 +4,5 @@ description: permet d&#039;ajouter des styles et de construire rapidement des la
 package: Custom
 core_version_requirement: ^9 || ^10
 dependencies:
-  - formatage_models
-  - generate_style_theme
+  - formatage_models:formatage_models
+  - generate_style_theme:generate_style_theme
