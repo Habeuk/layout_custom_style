@@ -54,6 +54,12 @@ abstract class StyleScssPluginBase extends PluginBase implements StyleScssInterf
     return new static($configuration, $plugin_id, $plugin_definition, $container->get('config.factory'));
   }
   
+  public static function defaultConfiguration() {
+    return [
+      'scss_field' => ''
+    ];
+  }
+  
   /**
    *
    * {@inheritdoc}

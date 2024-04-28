@@ -17,10 +17,8 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class Scss extends StyleScssPluginBase {
   
-  public function defaultConfiguration() {
-    return [
-      'scss_field' => ''
-    ];
+  public static function defaultConfiguration() {
+    return [] + parent::defaultConfiguration();
   }
   
   /**
