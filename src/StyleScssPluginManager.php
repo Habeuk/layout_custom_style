@@ -113,12 +113,18 @@ class StyleScssPluginManager extends DefaultPluginManager {
       $instance->submitConfigurationForm($form, $form_state);
       $storage[$plugin['id']] = $instance->getConfiguration();
       $contentScss = $instance->getScss();
+      $contentJs = $instance->getJs();
       $key = $storage['id'];
       if (!empty($contentScss)) {
         $scss = '.' . $storage['id'] . ' {';
         $scss .= $instance->getScss();
         $scss .= '}';
         $js = '';
+        if (!empty($contentJs)) {
+          $js = '(function (Drupal) {';
+          $js .= $contentJs;
+          $js .= '})(window.Drupal);';
+        }
         $this->ManageFileCustomStyle->saveStyle($key, $plugin['provider'], $scss, $js);
       }
       else {
@@ -172,5 +178,4 @@ class StyleScssPluginManager extends DefaultPluginManager {
       $build['#attributes']['class'][] = $storage['id'];
     }
   }
-  
 }

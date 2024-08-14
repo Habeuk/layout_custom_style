@@ -56,7 +56,8 @@ abstract class StyleScssPluginBase extends PluginBase implements StyleScssInterf
   
   public static function defaultConfiguration() {
     return [
-      'scss_field' => ''
+      'scss_field' => '',
+      'file_js' => ''
     ];
   }
   
@@ -98,6 +99,9 @@ abstract class StyleScssPluginBase extends PluginBase implements StyleScssInterf
   public function getScss() {
   }
   
+  public function getJs() {
+  }
+  
   /**
    *
    * {@inheritdoc}
@@ -105,5 +109,4 @@ abstract class StyleScssPluginBase extends PluginBase implements StyleScssInterf
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->configuration = $form_state->getValue($this->pluginId);
   }
-  
 }
