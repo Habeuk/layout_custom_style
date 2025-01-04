@@ -190,9 +190,11 @@ class StyleScssPluginManager extends DefaultPluginManager {
        */
       $ContextValue = $entityContext->getContextValue();
       if ($ContextValue instanceof \Drupal\Core\Entity\EntityInterface) {
-        if (!str_contains($storage['id'], '---')) {
+        $id = $ContextValue->id();
+        // On opte pour etre strict afin de reduire les erreurs humaines.
+        if (!str_contains($storage['id'], '---' . $id)) {
           $bundle = $ContextValue->bundle() ? $ContextValue->bundle() : $ContextValue->getEntityTypeId();
-          $key = $ContextValue->getEntityTypeId() . '__' . $bundle . '---' . $ContextValue->id();
+          $key = $ContextValue->getEntityTypeId() . '__' . $bundle . '---' . $id;
           $storage['id'] = $key;
         }
       }
@@ -201,7 +203,7 @@ class StyleScssPluginManager extends DefaultPluginManager {
       }
     }
     else {
-      throw new \Exception("Type plugin 'SectionStorage' not found");
+      throw new \Exception("Type pluginId 'SectionStorage' not found");
     }
     return $storage['id'];
   }
