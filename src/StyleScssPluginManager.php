@@ -6,8 +6,8 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Component\Utility\Html;
 use Drupal\generate_style_theme\Services\ManageFileCustomStyle;
+use Drupal\layout_builder\Form\ConfigureSectionForm;
 
 /**
  * StyleScss plugin manager.
@@ -69,37 +69,45 @@ class StyleScssPluginManager extends DefaultPluginManager {
         '#description' => $instance->description() . "BUG : Editer scss dans un nouveau onglet",
         '#open' => false
       ];
-      
       $instance->buildConfigurationForm($form[$plugin['id']], $form_state);
+      //
+      // /**
+      // *
+      // * @var \Drupal\layout_builder\Form\ConfigureSectionForm $object
+      // */
+      // $object = $form_state->getFormObject();
+      // $typePlugin = $object->getSectionStorage()->getPluginId();
+      // if ($typePlugin == 'overrides') {
+      // /**
+      // *
+      // * @var \Drupal\Core\Plugin\Context\EntityContext $entityContext
+      // */
+      // $entityContext = $object->getSectionStorage()->getContext('entity');
+      // /**
+      // *
+      // * @var \Drupal\Core\Entity\EntityInterface $ContextValue
+      // */
+      // $ContextValue = $entityContext->getContextValue();
+      // // dd($object);
+      // }
     }
   }
   
   /**
+   * On a un soucis de sauvegarde de la configuration, elle est sauvegardée dans
+   * l'entité file_style et aussi dans la configuration de la section, il
+   * faudroit voir comment sauvegarder cela de manière unique.
+   * ( Le serait de sauvegarder uniquement en bd, afin d'alleger le fichier de
+   * configuration ).
    *
    * @param array $form
    * @param FormStateInterface $form_state
    * @param array $storage
    */
   public function submitConfigurationForm(array $form, FormStateInterface $form_state, array &$storage) {
-    /**
-     * Ce #id permet d'identifier la section.
-     * Elle est generé à la premier sauvegarde.
-     */
-    if (empty($storage['id'])) {
-      /**
-       *
-       * @var \Drupal\layout_builder\Form\ConfigureSectionForm $object
-       */
-      $object = $form_state->getFormObject();
-      /**
-       *
-       * @var \Drupal\Core\Layout\LayoutInterface $layout
-       */
-      $layout = $object->getCurrentLayout();
-      $id = Html::getUniqueId($layout->getPluginId() . '--' . rand(100, 9999));
-      $storage['id'] = $id;
-    }
-    // save scss in theme.
+    $this->getDefaultId($storage, $form_state);
+    // Save scss in theme.
+    $key = $storage['id'];
     $plugins = $this->getDefinitions();
     foreach ($plugins as $plugin) {
       if (empty($storage[$plugin['id']])) {
@@ -114,9 +122,8 @@ class StyleScssPluginManager extends DefaultPluginManager {
       $storage[$plugin['id']] = $instance->getConfiguration();
       $contentScss = $instance->getScss();
       $contentJs = $instance->getJs();
-      $key = $storage['id'];
       if (!empty($contentScss)) {
-        $scss = '.' . $storage['id'] . ' {';
+        $scss = '.' . $key . ' {';
         $scss .= $instance->getScss();
         $scss .= '}';
         $js = '';
@@ -131,6 +138,72 @@ class StyleScssPluginManager extends DefaultPluginManager {
         $this->ManageFileCustomStyle->deleteStyle($key, $plugin['provider']);
       }
     }
+  }
+  
+  /**
+   *
+   * @param array $storage
+   * @param FormStateInterface $form_state
+   */
+  protected function getDefaultId(array &$storage, FormStateInterface $form_state) {
+    /**
+     *
+     * @var ConfigureSectionForm $object
+     */
+    $object = $form_state->getFormObject();
+    $typePlugin = $object->getSectionStorage()->getPluginId();
+    /**
+     * Les affichages par defaut.
+     */
+    if ($typePlugin == 'defaults') {
+      if (empty($storage['id'])) {
+        /**
+         * On doit etre dans le type defautls et dans ce cas le context display
+         * existe.
+         *
+         * @var \Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay $LayoutEntityViewDipsly
+         */
+        $LayoutEntityViewDipsly = $object->getSectionStorage()->getContext('display')->getContextValue();
+        $key = str_replace(".", "__", $LayoutEntityViewDipsly->id());
+        $delta = \Drupal::routeMatch()->getParameter('delta');
+        if ($delta)
+          $key = $key . '__' . $delta;
+        $storage['id'] = $key;
+      }
+    }
+    /**
+     * Les affichages surchargés ne tiennent pas compte du display, mais de
+     * l'id.
+     * De plus, seuls l'affichage par defaut peut etre surcharger.
+     */
+    elseif ($typePlugin == 'overrides') {
+      if (empty($storage['id']))
+        $storage['id'] = '';
+      /**
+       *
+       * @var \Drupal\Core\Plugin\Context\EntityContext $entityContext
+       */
+      $entityContext = $object->getSectionStorage()->getContext('entity');
+      /**
+       *
+       * @var \Drupal\Core\Entity\EntityInterface $ContextValue
+       */
+      $ContextValue = $entityContext->getContextValue();
+      if ($ContextValue instanceof \Drupal\Core\Entity\EntityInterface) {
+        if (!str_contains($storage['id'], '---')) {
+          $bundle = $ContextValue->bundle() ? $ContextValue->bundle() : $ContextValue->getEntityTypeId();
+          $key = $ContextValue->getEntityTypeId() . '__' . $bundle . '---' . $ContextValue->id();
+          $storage['id'] = $key;
+        }
+      }
+      else {
+        throw new \Exception('ContextValue is not an instance of \Drupal\Core\Entity\EntityInterface');
+      }
+    }
+    else {
+      throw new \Exception("Type plugin 'SectionStorage' not found");
+    }
+    return $storage['id'];
   }
   
   /**

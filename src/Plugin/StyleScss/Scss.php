@@ -58,24 +58,40 @@ class Scss extends StyleScssPluginBase {
           'lang_js'
         ]
       ],
-      "#description" => "Vous pouvez ajouter les mixins et les librairies inclut dans @stephane888/wbu-atomique<br>
+      "#description" => 'Vous pouvez ajouter les mixins et les librairies inclut dans @stephane888/wbu-atomique<br>
 <br>
 <b>Example de code valide :</b>
 <pre>
-Drupal.behaviors.paragraph_navigate_to_next = {
-    attach: function (context, settings) {
-      // On se rassure que l'element est present dans le context.
-      if (context.querySelectorAll && context.querySelectorAll('[data-action=\"navigate-next\"]')) {
-        // On se rasure que l'element est lu 1 seule foix.
-        once(\"paragraph_navigate_to_next\", '[data-action=\"navigate-next\"]', context).forEach((scrollToTopBtn) => {
-          console.log(\" paragraph_navigate_to_next : \", scrollToTopBtn);
-          //
-        });
-      }
-    },
-  };
+Drupal.behaviors.open_coloris = {
+  attach: function (context, settings) {
+    // "settings" contient les variables provenant de Drupal.
+    // On se rassure que l\'element est present dans le "context".    
+    if (context.querySelectorAll && context.querySelectorAll(".static-format.field__items")) {
+      // On se rasure que l\'element est lu 1 seule foix.
+      // "open_coloris_key_unique" doit etre ajuster, elle doit etre unique par element.
+      // ".static-format.field__items" represente le selecteur css.
+      once("open_coloris_key_unique", ".static-format.field__items", context).forEach((item) => {
+        // console.log(" item element : ", item);
+        const link = item.querySelector(".open_coloris");
+        if (link) {
+          link.addEventListener(
+            "click",
+            () => {
+              AddClass(item, link);
+            },
+            false
+          );
+        }
+      });
+      const AddClass = (item, link) => {
+        item.classList.add("show-all");
+        link.style.display = "none";
+      };
+    }
+  },
+};
 </pre>
-"
+'
     ];
     $form['#attached']['library'][] = 'generate_style_theme/codemirror_admin';
   }
