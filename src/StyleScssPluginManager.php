@@ -151,61 +151,64 @@ class StyleScssPluginManager extends DefaultPluginManager {
      * @var ConfigureSectionForm $object
      */
     $object = $form_state->getFormObject();
-    $typePlugin = $object->getSectionStorage()->getPluginId();
-    /**
-     * Les affichages par defaut.
-     */
-    if ($typePlugin == 'defaults') {
-      if (empty($storage['id'])) {
-        /**
-         * On doit etre dans le type defautls et dans ce cas le context display
-         * existe.
-         *
-         * @var \Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay $LayoutEntityViewDipsly
-         */
-        $LayoutEntityViewDipsly = $object->getSectionStorage()->getContext('display')->getContextValue();
-        $key = str_replace(".", "__", $LayoutEntityViewDipsly->id());
-        $delta = \Drupal::routeMatch()->getParameter('delta');
-        if ($delta)
-          $key = $key . '__' . $delta;
-        $storage['id'] = $key;
-      }
-    }
-    /**
-     * Les affichages surchargés ne tiennent pas compte du display, mais de
-     * l'id.
-     * De plus, seuls l'affichage par defaut peut etre surcharger.
-     */
-    elseif ($typePlugin == 'overrides') {
-      if (empty($storage['id']))
-        $storage['id'] = '';
+    if ($object) {
+      $typePlugin = $object->getSectionStorage()->getPluginId();
       /**
-       *
-       * @var \Drupal\Core\Plugin\Context\EntityContext $entityContext
+       * Les affichages par defaut.
        */
-      $entityContext = $object->getSectionStorage()->getContext('entity');
-      /**
-       *
-       * @var \Drupal\Core\Entity\EntityInterface $ContextValue
-       */
-      $ContextValue = $entityContext->getContextValue();
-      if ($ContextValue instanceof \Drupal\Core\Entity\EntityInterface) {
-        $id = $ContextValue->id();
-        // On opte pour etre strict afin de reduire les erreurs humaines.
-        if (!str_contains($storage['id'], '---' . $id)) {
-          $bundle = $ContextValue->bundle() ? $ContextValue->bundle() : $ContextValue->getEntityTypeId();
-          $key = $ContextValue->getEntityTypeId() . '__' . $bundle . '---' . $id;
+      if ($typePlugin == 'defaults') {
+        if (empty($storage['id'])) {
+          /**
+           * On doit etre dans le type defautls et dans ce cas le context
+           * display
+           * existe.
+           *
+           * @var \Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay $LayoutEntityViewDipsly
+           */
+          $LayoutEntityViewDipsly = $object->getSectionStorage()->getContext('display')->getContextValue();
+          $key = str_replace(".", "__", $LayoutEntityViewDipsly->id());
+          $delta = \Drupal::routeMatch()->getParameter('delta');
+          if ($delta)
+            $key = $key . '__' . $delta;
           $storage['id'] = $key;
         }
       }
-      else {
-        throw new \Exception('ContextValue is not an instance of \Drupal\Core\Entity\EntityInterface');
+      /**
+       * Les affichages surchargés ne tiennent pas compte du display, mais de
+       * l'id.
+       * De plus, seuls l'affichage par defaut peut etre surcharger.
+       */
+      elseif ($typePlugin == 'overrides') {
+        if (empty($storage['id']))
+          $storage['id'] = '';
+        /**
+         *
+         * @var \Drupal\Core\Plugin\Context\EntityContext $entityContext
+         */
+        $entityContext = $object->getSectionStorage()->getContext('entity');
+        /**
+         *
+         * @var \Drupal\Core\Entity\EntityInterface $ContextValue
+         */
+        $ContextValue = $entityContext->getContextValue();
+        if ($ContextValue instanceof \Drupal\Core\Entity\EntityInterface) {
+          $id = $ContextValue->id();
+          // On opte pour etre strict afin de reduire les erreurs humaines.
+          if (!str_contains($storage['id'], '---' . $id)) {
+            $bundle = $ContextValue->bundle() ? $ContextValue->bundle() : $ContextValue->getEntityTypeId();
+            $key = $ContextValue->getEntityTypeId() . '__' . $bundle . '---' . $id;
+            $storage['id'] = $key;
+          }
+        }
+        else {
+          throw new \Exception('ContextValue is not an instance of \Drupal\Core\Entity\EntityInterface');
+        }
       }
+      else {
+        throw new \Exception("Type pluginId 'SectionStorage' not found");
+      }
+      return $storage['id'];
     }
-    else {
-      throw new \Exception("Type pluginId 'SectionStorage' not found");
-    }
-    return $storage['id'];
   }
   
   /**
