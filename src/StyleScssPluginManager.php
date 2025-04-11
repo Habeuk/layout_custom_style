@@ -123,14 +123,14 @@ class StyleScssPluginManager extends DefaultPluginManager {
       $contentScss = $instance->getScss();
       $contentJs = $instance->getJs();
       if (!empty($contentScss)) {
-        $scss = '.' . $key . ' {';
+        $scss = "\n." . $key . " {\n";
         $scss .= $instance->getScss();
-        $scss .= '}';
+        $scss .= "\n}\n";
         $js = '';
         if (!empty($contentJs)) {
-          $js = '(function (Drupal) {';
+          $js = "\n(function (Drupal, once) {\n";
           $js .= $contentJs;
-          $js .= '})(window.Drupal);';
+          $js .= "\n})(window.Drupal, window.once);\n";
         }
         $this->ManageFileCustomStyle->saveStyle($key, $plugin['provider'], $scss, $js);
       }

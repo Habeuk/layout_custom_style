@@ -91,6 +91,7 @@ Drupal.behaviors.open_coloris = {
   },
 };
 </pre>
+<p>Your content will be contained within "(function (Drupal, once) {" and "})(window.Drupal, window.once);"</p>
 '
     ];
     $form['#attached']['library'][] = 'generate_style_theme/codemirror_admin';
