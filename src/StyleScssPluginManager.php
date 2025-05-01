@@ -8,6 +8,7 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\generate_style_theme\Services\ManageFileCustomStyle;
 use Drupal\layout_builder\Form\ConfigureSectionForm;
+use Drupal\Core\Form\FormState;
 
 /**
  * StyleScss plugin manager.
@@ -95,18 +96,27 @@ class StyleScssPluginManager extends DefaultPluginManager {
   
   /**
    * On a un soucis de sauvegarde de la configuration, elle est sauvegardée dans
-   * l'entité file_style et aussi dans la configuration de la section, il
+   * l'entité file_style et aussi dans la configuration de la section( layout),
+   * il
    * faudroit voir comment sauvegarder cela de manière unique.
-   * ( Le serait de sauvegarder uniquement en bd, afin d'alleger le fichier de
-   * configuration ).
+   * ( l'ideale serait de sauvegarder uniquement en bd, afin d'alleger le
+   * fichier de configuration pour la version 2x).
    *
    * @param array $form
    * @param FormStateInterface $form_state
    * @param array $storage
    */
   public function submitConfigurationForm(array $form, FormStateInterface $form_state, array &$storage) {
-    $this->getDefaultId($storage, $form_state);
-    // Save scss in theme.
+    $this->saveConfiguration($form, $storage, $form_state);
+  }
+  
+  /**
+   * Permet à des modules externes de mettre à jour les styles de layouts.
+   */
+  public function saveConfiguration(array $form, array &$storage, $form_state = null) {
+    if ($form_state)
+      $this->getDefaultId($storage, $form_state);
+    // Save scss/js in theme.
     $key = $storage['id'];
     $plugins = $this->getDefinitions();
     foreach ($plugins as $plugin) {
@@ -118,20 +128,29 @@ class StyleScssPluginManager extends DefaultPluginManager {
        * @var \Drupal\layout_custom_style\StyleScssPluginBase $instance
        */
       $instance = $this->createInstance($plugin['id'], $storage[$plugin['id']]);
-      $instance->submitConfigurationForm($form, $form_state);
-      $storage[$plugin['id']] = $instance->getConfiguration();
+      // Si $form_state est definit, alors les valeurs des champs y sont
+      // present, on met à jour la configuration.
+      if ($form_state) {
+        $instance->submitConfigurationForm($form, $form_state);
+        $storage[$plugin['id']] = $instance->getConfiguration();
+      }
       $contentScss = $instance->getScss();
       $contentJs = $instance->getJs();
+      // get scss.
+      $scss = '';
       if (!empty($contentScss)) {
         $scss = "\n." . $key . " {\n";
         $scss .= $instance->getScss();
         $scss .= "\n}\n";
-        $js = '';
-        if (!empty($contentJs)) {
-          $js = "\n(function (Drupal, once) {\n";
-          $js .= $contentJs;
-          $js .= "\n})(window.Drupal, window.once);\n";
-        }
+      }
+      // get js.
+      $js = '';
+      if (!empty($contentJs)) {
+        $js = "\n(function (Drupal, once) {\n";
+        $js .= $contentJs;
+        $js .= "\n})(window.Drupal, window.once);\n";
+      }
+      if (!empty($scss) || !empty($js)) {
         $this->ManageFileCustomStyle->saveStyle($key, $plugin['provider'], $scss, $js);
       }
       else {
