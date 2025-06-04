@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\generate_style_theme\Services\ManageFileCustomStyle;
 use Drupal\layout_builder\Form\ConfigureSectionForm;
 use Drupal\Core\Form\FormState;
+use Drupal\Component\Utility\Html;
 
 /**
  * StyleScss plugin manager.
@@ -216,6 +217,9 @@ class StyleScssPluginManager extends DefaultPluginManager {
           if (!str_contains($storage['id'], '---' . $id)) {
             $bundle = $ContextValue->bundle() ? $ContextValue->bundle() : $ContextValue->getEntityTypeId();
             $key = $ContextValue->getEntityTypeId() . '__' . $bundle . '---' . $id;
+            $delta = \Drupal::routeMatch()->getParameter('delta');
+            if ($delta)
+              $key = $key . '__' . $delta;
             $storage['id'] = $key;
           }
         }
@@ -225,6 +229,10 @@ class StyleScssPluginManager extends DefaultPluginManager {
       }
       else {
         throw new \Exception("Type pluginId 'SectionStorage' not found");
+      }
+      //
+      if (empty($storage['id_html'])) {
+        $storage['id_html'] = Html::getUniqueId($storage['id']);
       }
       return $storage['id'];
     }
@@ -273,6 +281,9 @@ class StyleScssPluginManager extends DefaultPluginManager {
       if (empty($build['#attributes']['class']))
         $build['#attributes']['class'] = [];
       $build['#attributes']['class'][] = $storage['id'];
+    }
+    if (!empty($storage['id_html'])) {
+      $build['#attributes']['id'] = $storage['id_html'];
     }
   }
 }
