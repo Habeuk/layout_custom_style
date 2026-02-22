@@ -94,7 +94,7 @@ Drupal.behaviors.open_coloris = {
 <p>Your content will be contained within "(function (Drupal, once) {" and "})(window.Drupal, window.once);"</p>
 '
     ];
-    $form['#attached']['library'][] = 'generate_style_theme/codemirror_admin';
+    $form['#attached']['library'][] = 'layout_custom_style/codemirror_admin';
   }
   
   /**
@@ -108,4 +108,5 @@ Drupal.behaviors.open_coloris = {
   public function getJs() {
     return $this->configuration['file_js'];
   }
+  
 }
