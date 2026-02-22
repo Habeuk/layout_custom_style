@@ -173,6 +173,8 @@ class StyleScssPluginManager extends DefaultPluginManager {
     $object = $form_state->getFormObject();
     if ($object) {
       $typePlugin = $object->getSectionStorage()->getPluginId();
+      
+      $id_html = $form_state->getValue('id_html');
       /**
        * Les affichages par defaut.
        */
@@ -191,6 +193,15 @@ class StyleScssPluginManager extends DefaultPluginManager {
           if ($delta)
             $key = $key . '__' . $delta;
           $storage['id'] = $key;
+        }
+        /**
+         * On permet à l'utilisateur de definir l'id.
+         */
+        if (empty($id_html)) {
+          $storage['id_html'] = Html::getUniqueId($storage['id']) . '-' . rand(10, 999);
+        }
+        else {
+          $storage['id_html'] = $id_html;
         }
       }
       /**
@@ -222,6 +233,22 @@ class StyleScssPluginManager extends DefaultPluginManager {
               $key = $key . '__' . $delta;
             $storage['id'] = $key;
           }
+          /**
+           * On permet à l'utilisateur de definir l'id.
+           */
+          if (empty($id_html)) {
+            $storage['id_html'] = Html::getUniqueId($storage['id']);
+          }
+          else {
+            // l'id doit etre conforme au format.
+            $idBase = Html::getUniqueId($storage['id']);
+            if (!str_contains($id_html, $idBase)) {
+              $storage['id_html'] = Html::getUniqueId($storage['id']);
+            }
+            else {
+              $storage['id_html'] = $id_html;
+            }
+          }
         }
         else {
           throw new \Exception('ContextValue is not an instance of \Drupal\Core\Entity\EntityInterface');
@@ -230,10 +257,7 @@ class StyleScssPluginManager extends DefaultPluginManager {
       else {
         throw new \Exception("Type pluginId 'SectionStorage' not found");
       }
-      //
-      if (empty($storage['id_html'])) {
-        $storage['id_html'] = Html::getUniqueId($storage['id']);
-      }
+      
       return $storage['id'];
     }
   }
@@ -286,4 +310,5 @@ class StyleScssPluginManager extends DefaultPluginManager {
       $build['#attributes']['id'] = $storage['id_html'];
     }
   }
+  
 }
